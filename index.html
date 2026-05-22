@@ -6,23 +6,82 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Bem-Estar">
-  <title>Dashboard de Bem-Estar</title>
+  <title>Bem-Estar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- ECRÃ DE AUTH (login / registo)             -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">✦</div>
+      <h1 class="auth-title">Bem-Estar</h1>
+      <p class="auth-sub">O teu diário de saúde diário</p>
+
+      <!-- tabs login / registo -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="authTab('login')">Entrar</button>
+        <button class="auth-tab" onclick="authTab('signup')">Criar conta</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="form-login" class="auth-form">
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="o.teu@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <p class="auth-error" id="login-error"></p>
+        <button class="auth-btn" onclick="fazerLogin()">Entrar</button>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="form-signup" class="auth-form hidden">
+        <div class="auth-field">
+          <label>Nome <span class="auth-hint">(máx. 12 caracteres)</span></label>
+          <input type="text" id="signup-nome" placeholder="O teu nome" maxlength="12" autocomplete="given-name">
+        </div>
+        <div class="auth-field">
+          <label>Email</label>
+          <input type="email" id="signup-email" placeholder="o.teu@email.com" autocomplete="email">
+        </div>
+        <div class="auth-field">
+          <label>Password <span class="auth-hint">(mín. 6 caracteres)</span></label>
+          <input type="password" id="signup-pass" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <p class="auth-error" id="signup-error"></p>
+        <button class="auth-btn" onclick="fazerSignup()">Criar conta</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- APP PRINCIPAL                              -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="app" class="app hidden">
 
     <!-- HEADER -->
     <header class="app-header">
       <div class="header-inner">
         <div>
-          <h1 class="header-title">Bem-Estar</h1>
+          <h1 class="header-title">Bem-Estar <span class="header-user" id="header-nome"></span></h1>
           <p class="header-date" id="data-hoje"></p>
         </div>
-        <div class="header-save" id="save-status"></div>
+        <div class="header-right">
+          <span class="header-save" id="save-status"></span>
+          <button class="btn-logout" onclick="fazerLogout()" title="Sair">
+            <i class="ti ti-logout"></i>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -76,20 +135,20 @@
         </div>
         <div class="section-divider"></div>
         <p class="sec-title">Nutrição & movimento</p>
-        <div class="slider-row"><label>Água (litros)</label><input type="range" min="0" max="4" step="0.5" value="0" oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'L'"><span class="val-out">0.0L</span></div>
-        <div class="num-row"><label>Passos</label><input type="number" min="0" step="500" value="0" placeholder="0"></div>
-        <div class="slider-row"><label>Alimentação (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value"><span class="val-out">5</span></div>
+        <div class="slider-row"><label>Água (litros)</label><input type="range" min="0" max="4" step="0.5" value="0" oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'L';marcarAlterado()"><span class="val-out">0.0L</span></div>
+        <div class="num-row"><label>Passos</label><input type="number" min="0" step="500" value="0" placeholder="0" oninput="marcarAlterado()"></div>
+        <div class="slider-row"><label>Alimentação (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">5</span></div>
       </div>
 
       <!-- SONO -->
       <div class="panel" id="panel-sono">
         <p class="sec-title">Ordem dos eventos</p>
         <div class="period-label">Manhã — acordar</div>
-        <div class="time-row"><label>Hora de acordar</label><input type="time" value="07:00"></div>
+        <div class="time-row"><label>Hora de acordar</label><input type="time" value="07:00" oninput="marcarAlterado()"></div>
         <div class="period-label" style="margin-top:12px;">Noite — deitar</div>
-        <div class="time-row"><label>Hora de deitar</label><input type="time" value="23:00"></div>
+        <div class="time-row"><label>Hora de deitar</label><input type="time" value="23:00" oninput="marcarAlterado()"></div>
         <div class="section-divider"></div>
-        <div class="slider-row"><label>Qualidade do sono (1-10)</label><input type="range" min="1" max="10" step="1" value="7" oninput="this.nextElementSibling.textContent=this.value"><span class="val-out">7</span></div>
+        <div class="slider-row"><label>Qualidade do sono (1-10)</label><input type="range" min="1" max="10" step="1" value="7" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">7</span></div>
       </div>
 
       <!-- SAÚDE MENTAL -->
@@ -98,34 +157,34 @@
         <div class="tri-block">
           <div class="tri-header"><span class="tri-label">Humor</span><span class="tri-media">Média: <span id="media-humor">—</span>/10</span></div>
           <div class="tri-row">
-            <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="humor-manha" oninput="document.getElementById('hm-val').textContent=this.value;calcMedia('humor')"><span class="tri-val" id="hm-val">5</span></div>
-            <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="humor-tarde" oninput="document.getElementById('ht-val').textContent=this.value;calcMedia('humor')"><span class="tri-val" id="ht-val">5</span></div>
-            <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="humor-noite" oninput="document.getElementById('hn-val').textContent=this.value;calcMedia('humor')"><span class="tri-val" id="hn-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="humor-manha" oninput="document.getElementById('hm-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="hm-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="humor-tarde" oninput="document.getElementById('ht-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="ht-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="humor-noite" oninput="document.getElementById('hn-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="hn-val">5</span></div>
           </div>
         </div>
         <p class="sec-title" style="margin-top:1rem;">Energia ao longo do dia</p>
         <div class="tri-block">
           <div class="tri-header"><span class="tri-label">Energia</span><span class="tri-media">Média: <span id="media-energia">—</span>/10</span></div>
           <div class="tri-row">
-            <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="energia-manha" oninput="document.getElementById('em-val').textContent=this.value;calcMedia('energia')"><span class="tri-val" id="em-val">5</span></div>
-            <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="energia-tarde" oninput="document.getElementById('et-val').textContent=this.value;calcMedia('energia')"><span class="tri-val" id="et-val">5</span></div>
-            <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="energia-noite" oninput="document.getElementById('en-val').textContent=this.value;calcMedia('energia')"><span class="tri-val" id="en-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="energia-manha" oninput="document.getElementById('em-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="em-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="energia-tarde" oninput="document.getElementById('et-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="et-val">5</span></div>
+            <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="energia-noite" oninput="document.getElementById('en-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="en-val">5</span></div>
           </div>
         </div>
         <div class="section-divider"></div>
         <p class="sec-title">Ansiedade</p>
-        <div class="slider-row"><label>Ansiedade (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value"><span class="val-out">5</span></div>
+        <div class="slider-row"><label>Ansiedade (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">5</span></div>
         <div class="section-divider"></div>
         <p class="sec-title">Notas do dia</p>
         <div class="period-label">Manhã</div>
-        <textarea class="nota" id="nota-manha" placeholder="Como começaste o dia?"></textarea>
+        <textarea class="nota" id="nota-manha" placeholder="Como começaste o dia?" oninput="marcarAlterado()"></textarea>
         <div class="period-label">Tarde</div>
-        <textarea class="nota" id="nota-tarde" placeholder="Como correu a tarde?"></textarea>
+        <textarea class="nota" id="nota-tarde" placeholder="Como correu a tarde?" oninput="marcarAlterado()"></textarea>
         <div class="period-label">Noite</div>
-        <textarea class="nota" id="nota-noite" placeholder="Reflexão do dia."></textarea>
+        <textarea class="nota" id="nota-noite" placeholder="Reflexão do dia." oninput="marcarAlterado()"></textarea>
         <div class="section-divider"></div>
         <p class="sec-title">Gratidão do dia</p>
-        <textarea class="nota" id="nota-gratidao" placeholder="Pelo que és grato hoje?"></textarea>
+        <textarea class="nota" id="nota-gratidao" placeholder="Pelo que és grato hoje?" oninput="marcarAlterado()"></textarea>
       </div>
 
       <!-- HIGIENE -->
@@ -149,10 +208,10 @@
       <!-- HÁBITOS BONS -->
       <div class="panel" id="panel-bons">
         <p class="sec-title">Mente & desenvolvimento</p>
-        <div class="num-row"><label>Leitura (min)</label><input type="number" min="0" step="5" value="0" placeholder="0"></div>
-        <div class="num-row"><label>Meditação manhã (min)</label><input type="number" min="0" step="5" value="0" placeholder="0"></div>
-        <div class="num-row"><label>Meditação noite (min)</label><input type="number" min="0" step="5" value="0" placeholder="0"></div>
-        <div class="num-row"><label>Estudo (min)</label><input type="number" min="0" step="5" value="0" placeholder="0"></div>
+        <div class="num-row"><label>Leitura (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
+        <div class="num-row"><label>Meditação manhã (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
+        <div class="num-row"><label>Meditação noite (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
+        <div class="num-row"><label>Estudo (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
         <div class="section-divider"></div>
         <p class="sec-title">Social & bem-estar</p>
         <div class="hab-list" id="bons-list">
@@ -165,11 +224,9 @@
       <div class="panel" id="panel-cfg">
         <p class="sec-title">Hábitos personalizados</p>
         <div id="custom-list"><p class="empty-msg" id="empty-msg">Ainda não adicionaste hábitos personalizados.</p></div>
-
         <p class="sec-title" style="margin-top:1.5rem;">Hábitos de base (ocultar)</p>
         <p class="cfg-hint">Oculta hábitos que não se aplicam a ti.</p>
         <div id="base-list"></div>
-
         <div class="add-form">
           <p class="add-form-title">Adicionar novo hábito</p>
           <input type="text" class="add-input" id="new-nome" placeholder="Nome do hábito..." maxlength="50">
@@ -196,10 +253,24 @@
 
     <!-- FOOTER -->
     <footer class="app-footer">
-      <textarea class="nota nota-footer" id="nota-geral" placeholder="Nota geral do dia..."></textarea>
+      <textarea class="nota nota-footer" id="nota-geral" placeholder="Nota geral do dia..." oninput="marcarAlterado()"></textarea>
       <button class="btn-guardar" onclick="guardar()"><i class="ti ti-device-floppy"></i> Guardar registo</button>
     </footer>
 
+  </div>
+
+  <!-- AVISO DADOS NÃO GUARDADOS -->
+  <div id="aviso-overlay" class="aviso-overlay hidden">
+    <div class="aviso-card">
+      <div class="aviso-icon">⚠️</div>
+      <h2 class="aviso-titulo">Tens alterações por guardar</h2>
+      <p class="aviso-texto">Se saíres agora perdes os dados do dia. Queres guardar antes de sair?</p>
+      <div class="aviso-btns">
+        <button class="aviso-btn aviso-btn-guardar" onclick="guardarESair()">Guardar e sair</button>
+        <button class="aviso-btn aviso-btn-sair" onclick="sairSemGuardar()">Sair sem guardar</button>
+        <button class="aviso-btn aviso-btn-cancelar" onclick="fecharAviso()">Cancelar</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>
