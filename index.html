@@ -1,140 +1,98 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Bem-Estar">
-  <title>Bem-Estar</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+Bem-Estar
 
-  <div class="app">
 
-    <!-- HEADER -->
-    <header class="app-header">
-      <div class="header-left">
-        <div class="logo">✦</div>
-        <div>
-          <h1 class="header-title">Bem-Estar</h1>
-          <p class="header-date" id="data-hoje"></p>
-        </div>
-      </div>
-      <div class="save-badge" id="save-status"></div>
-    </header>
+0/0 hábitos
 
-    <!-- SCORE BAR -->
-    <div class="score-bar">
-      <div class="score-item">
-        <span class="score-num" id="s-hab">0/0</span>
-        <span class="score-lbl">hábitos</span>
-      </div>
-      <div class="score-sep"></div>
-      <div class="score-item">
-        <span class="score-num" id="s-humor">—</span>
-        <span class="score-lbl">humor</span>
-      </div>
-      <div class="score-sep"></div>
-      <div class="score-item">
-        <span class="score-num" id="s-energia">—</span>
-        <span class="score-lbl">energia</span>
-      </div>
-      <div class="score-sep"></div>
-      <div class="score-item">
-        <span class="score-num" id="s-sono">—h</span>
-        <span class="score-lbl">sono</span>
-      </div>
-    </div>
+— humor
 
-    <!-- MAIN CONTENT -->
-    <main class="main">
+— energia
 
-      <!-- HÁBITOS -->
-      <section class="card">
-        <div class="card-header">
-          <h2 class="card-title">Hábitos do dia</h2>
-          <span class="card-badge" id="hab-badge">0/5</span>
-        </div>
-        <div class="habits-grid" id="habits-grid">
-          <!-- gerado pelo JS -->
-        </div>
-      </section>
+0% completo
 
-      <!-- MOOD + ENERGIA -->
-      <div class="two-col">
+Física Sono Mental Higiene Hábitos + Gerir
+Manhã
 
-        <section class="card">
-          <h2 class="card-title">Humor</h2>
-          <div class="emoji-picker" id="humor-picker">
-            <button class="emoji-btn" data-val="1" title="Muito mau">😞</button>
-            <button class="emoji-btn" data-val="2" title="Mau">😐</button>
-            <button class="emoji-btn" data-val="3" title="OK">🙂</button>
-            <button class="emoji-btn" data-val="4" title="Bom">😊</button>
-            <button class="emoji-btn" data-val="5" title="Ótimo">😄</button>
-          </div>
-        </section>
+Calistenia manhã
 
-        <section class="card">
-          <h2 class="card-title">Energia</h2>
-          <div class="emoji-picker" id="energia-picker">
-            <button class="emoji-btn" data-val="1" title="Esgotado">🪫</button>
-            <button class="emoji-btn" data-val="2" title="Cansado">😴</button>
-            <button class="emoji-btn" data-val="3" title="Normal">⚡</button>
-            <button class="emoji-btn" data-val="4" title="Ativo">🔥</button>
-            <button class="emoji-btn" data-val="5" title="Máximo">🚀</button>
-          </div>
-        </section>
+Bicicleta manhã
+Tarde / Noite
 
-      </div>
+Treino
 
-      <!-- SONO -->
-      <section class="card">
-        <div class="card-header">
-          <h2 class="card-title">Sono</h2>
-          <span class="sono-val" id="sono-display">7h</span>
-        </div>
-        <div class="slider-wrap">
-          <span class="slider-label">4h</span>
-          <input type="range" id="sono-slider" min="4" max="12" step="0.5" value="7" class="slider">
-          <span class="slider-label">12h</span>
-        </div>
-        <div class="sono-bar-wrap">
-          <div class="sono-bar" id="sono-bar" style="width: 50%"></div>
-        </div>
-      </section>
+Nutrição & movimento
+Água (litros)0.0L
+Passos
+Alimentação (1-10)5
+Ordem dos eventos
+Manhã — acordar
+Hora de acordar
+Noite — deitar
+Hora de deitar
 
-      <!-- NOTAS -->
-      <section class="card">
-        <h2 class="card-title">Notas do dia</h2>
-        <textarea id="notas" class="notas-input" placeholder="Como foi o teu dia? O que queres lembrar?"></textarea>
-      </section>
+Qualidade do sono (1-10)7
+Humor ao longo do dia
+HumorMédia: —/10
+Manhã5
+Tarde5
+Noite5
+Energia ao longo do dia
+EnergiaMédia: —/10
+Manhã5
+Tarde5
+Noite5
 
-      <!-- BOTÃO GUARDAR -->
-      <button class="btn-guardar" id="btn-guardar" onclick="guardarDia()">
-        <span>Guardar o dia</span>
-        <span class="btn-icon">→</span>
-      </button>
+Ansiedade
+Ansiedade (1-10)5
 
-    </main>
+Notas do dia
+Manhã
+Tarde
+Noite
 
-    <!-- HISTÓRICO (tab) -->
-    <div class="tab-bar">
-      <button class="tab active" onclick="mudarTab('hoje')">Hoje</button>
-      <button class="tab" onclick="mudarTab('historico')">Histórico</button>
-    </div>
+Gratidão do dia
+Manhã
 
-    <div id="painel-historico" class="historico-panel hidden">
-      <div id="historico-lista" class="historico-lista">
-        <p class="historico-empty">A carregar...</p>
-      </div>
-    </div>
+Dentes manhã
 
-  </div>
+Duche
 
-  <script src="app.js"></script>
-</body>
-</html>
+Skincare
+
+Medicação manhã
+Noite
+
+Dentes noite
+
+Dentadura noite
+
+Gotas noite
+
+Medicação pós-jantar
+Mente & desenvolvimento
+Leitura (min)
+Meditação manhã (min)
+Meditação noite (min)
+Estudo (min)
+
+Social & bem-estar
+
+Apanhar ar
+
+Conviver
+Hábitos personalizados
+Ainda não adicionaste hábitos personalizados.
+Hábitos de base (ocultar)
+Oculta hábitos que não se aplicam a ti.
+
+Adicionar novo hábito
+Tab
+                Saúde Física
+                Higiene
+                Hábitos Bons
+              
+Período
+                Manhã
+                Tarde / Noite
+              
+Adicionar hábito
+Guardar registo
