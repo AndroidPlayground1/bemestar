@@ -23,7 +23,6 @@
       <h1 class="auth-title">Bem-Estar</h1>
       <p class="auth-sub">O teu diário de saúde diário</p>
 
-      <!-- tabs login / registo -->
       <div class="auth-tabs">
         <button class="auth-tab active" onclick="authTab('login')">Entrar</button>
         <button class="auth-tab" onclick="authTab('signup')">Criar conta</button>
@@ -32,8 +31,8 @@
       <!-- LOGIN -->
       <div id="form-login" class="auth-form">
         <div class="auth-field">
-          <label>Email</label>
-          <input type="email" id="login-email" placeholder="o.teu@email.com" autocomplete="email">
+          <label>Nome de utilizador</label>
+          <input type="text" id="login-user" placeholder="o teu username" autocomplete="username" maxlength="12">
         </div>
         <div class="auth-field">
           <label>Password</label>
@@ -46,12 +45,8 @@
       <!-- SIGNUP -->
       <div id="form-signup" class="auth-form hidden">
         <div class="auth-field">
-          <label>Nome <span class="auth-hint">(máx. 12 caracteres)</span></label>
-          <input type="text" id="signup-nome" placeholder="O teu nome" maxlength="12" autocomplete="given-name">
-        </div>
-        <div class="auth-field">
-          <label>Email</label>
-          <input type="email" id="signup-email" placeholder="o.teu@email.com" autocomplete="email">
+          <label>Nome de utilizador <span class="auth-hint">(máx. 12 caracteres)</span></label>
+          <input type="text" id="signup-user" placeholder="escolhe um username" maxlength="12" autocomplete="username">
         </div>
         <div class="auth-field">
           <label>Password <span class="auth-hint">(mín. 6 caracteres)</span></label>
@@ -60,7 +55,6 @@
         <p class="auth-error" id="signup-error"></p>
         <button class="auth-btn" onclick="fazerSignup()">Criar conta</button>
       </div>
-
     </div>
   </div>
 
@@ -122,58 +116,141 @@
     <!-- CONTEÚDO -->
     <main class="content">
 
-      <!-- SAÚDE FÍSICA -->
+      <!-- ══ SAÚDE FÍSICA ══ -->
       <div class="panel active" id="panel-fisica">
+
+        <p class="sec-title">Exercício</p>
+
         <div class="period-label">Manhã</div>
         <div class="hab-list" id="fisica-manha">
-          <div class="hab" data-id="calistenia" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Calistenia manhã</span></div>
-          <div class="hab" data-id="bicicleta" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Bicicleta manhã</span></div>
+          <div class="hab" data-id="treino-manha" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Treino manhã</span>
+          </div>
+          <div class="hab" data-id="alongamentos-m" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Alongamentos</span>
+          </div>
+          <div class="hab" data-id="caminhar-m" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Caminhar / passeio</span>
+          </div>
         </div>
-        <div class="period-label">Tarde / Noite</div>
+
+        <!-- CARDIO com detalhes -->
+        <div class="cardio-block" id="cardio-block">
+          <div class="hab" data-id="cardio" onclick="toggleHab(this); toggleCardioDetails()">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Cardio</span>
+          </div>
+          <div class="cardio-details hidden" id="cardio-details">
+            <div class="cardio-row">
+              <label class="cardio-label">Tipo</label>
+              <div class="cardio-tipo-grid">
+                <button class="tipo-btn" data-tipo="correr" onclick="selectTipo(this)">🏃 Correr</button>
+                <button class="tipo-btn" data-tipo="bicicleta" onclick="selectTipo(this)">🚴 Bicicleta</button>
+                <button class="tipo-btn" data-tipo="passear" onclick="selectTipo(this)">🚶 Passear</button>
+                <button class="tipo-btn" data-tipo="nadar" onclick="selectTipo(this)">🏊 Nadar</button>
+                <button class="tipo-btn" data-tipo="remo" onclick="selectTipo(this)">🚣 Remo</button>
+                <button class="tipo-btn" data-tipo="outro" onclick="selectTipo(this)">✦ Outro</button>
+              </div>
+            </div>
+            <div class="cardio-row">
+              <label class="cardio-label">Distância (km)</label>
+              <input type="number" id="cardio-km" min="0" step="0.1" placeholder="0.0" oninput="marcarAlterado()">
+              <span class="cardio-unit">km</span>
+            </div>
+            <div class="cardio-row">
+              <label class="cardio-label">Duração (min)</label>
+              <input type="number" id="cardio-min" min="0" step="5" placeholder="0" oninput="marcarAlterado()">
+              <span class="cardio-unit">min</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="period-label" style="margin-top:10px;">Tarde / Noite</div>
         <div class="hab-list" id="fisica-tarde">
-          <div class="hab" data-id="treino" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Treino</span></div>
+          <div class="hab" data-id="treino" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Treino</span>
+          </div>
+          <div class="hab" data-id="alongamentos-t" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Alongamentos</span>
+          </div>
+          <div class="hab" data-id="caminhar-t" onclick="toggleHab(this)">
+            <div class="chk"><i class="ti ti-check"></i></div>
+            <span class="nm">Caminhar / passeio</span>
+          </div>
         </div>
-        <div class="section-divider"></div>
-        <p class="sec-title">Nutrição & movimento</p>
-        <div class="slider-row"><label>Água (litros)</label><input type="range" min="0" max="4" step="0.5" value="0" oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'L';marcarAlterado()"><span class="val-out">0.0L</span></div>
-        <div class="num-row"><label>Passos</label><input type="number" min="0" step="500" value="0" placeholder="0" oninput="marcarAlterado()"></div>
-        <div class="slider-row"><label>Alimentação (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">5</span></div>
+
       </div>
 
-      <!-- SONO -->
+      <!-- ══ SONO ══ -->
       <div class="panel" id="panel-sono">
         <p class="sec-title">Ordem dos eventos</p>
         <div class="period-label">Manhã — acordar</div>
-        <div class="time-row"><label>Hora de acordar</label><input type="time" value="07:00" oninput="marcarAlterado()"></div>
+        <div class="time-row">
+          <label>Hora de acordar</label>
+          <input type="time" id="hora-acordar" value="07:00" oninput="marcarAlterado()">
+        </div>
         <div class="period-label" style="margin-top:12px;">Noite — deitar</div>
-        <div class="time-row"><label>Hora de deitar</label><input type="time" value="23:00" oninput="marcarAlterado()"></div>
+        <div class="time-row">
+          <label>Hora de deitar</label>
+          <input type="time" id="hora-deitar" value="23:00" oninput="marcarAlterado()">
+        </div>
         <div class="section-divider"></div>
-        <div class="slider-row"><label>Qualidade do sono (1-10)</label><input type="range" min="1" max="10" step="1" value="7" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">7</span></div>
+        <div class="slider-row">
+          <label>Qualidade do sono (1-10)</label>
+          <input type="range" min="1" max="10" step="1" value="7" id="qualidade-sono"
+            oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()">
+          <span class="val-out">7</span>
+        </div>
       </div>
 
-      <!-- SAÚDE MENTAL -->
+      <!-- ══ SAÚDE MENTAL ══ -->
       <div class="panel" id="panel-mental">
         <p class="sec-title">Humor ao longo do dia</p>
         <div class="tri-block">
-          <div class="tri-header"><span class="tri-label">Humor</span><span class="tri-media">Média: <span id="media-humor">—</span>/10</span></div>
+          <div class="tri-header">
+            <span class="tri-label">Humor</span>
+            <span class="tri-media">Média: <span id="media-humor">—</span>/10</span>
+          </div>
           <div class="tri-row">
             <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="humor-manha" oninput="document.getElementById('hm-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="hm-val">5</span></div>
             <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="humor-tarde" oninput="document.getElementById('ht-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="ht-val">5</span></div>
             <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="humor-noite" oninput="document.getElementById('hn-val').textContent=this.value;calcMedia('humor');marcarAlterado()"><span class="tri-val" id="hn-val">5</span></div>
           </div>
         </div>
+
         <p class="sec-title" style="margin-top:1rem;">Energia ao longo do dia</p>
         <div class="tri-block">
-          <div class="tri-header"><span class="tri-label">Energia</span><span class="tri-media">Média: <span id="media-energia">—</span>/10</span></div>
+          <div class="tri-header">
+            <span class="tri-label">Energia</span>
+            <span class="tri-media">Média: <span id="media-energia">—</span>/10</span>
+          </div>
           <div class="tri-row">
             <div class="tri-period"><span class="plbl">Manhã</span><input type="range" min="0" max="10" step="1" value="5" id="energia-manha" oninput="document.getElementById('em-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="em-val">5</span></div>
             <div class="tri-period"><span class="plbl">Tarde</span><input type="range" min="0" max="10" step="1" value="5" id="energia-tarde" oninput="document.getElementById('et-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="et-val">5</span></div>
             <div class="tri-period"><span class="plbl">Noite</span><input type="range" min="0" max="10" step="1" value="5" id="energia-noite" oninput="document.getElementById('en-val').textContent=this.value;calcMedia('energia');marcarAlterado()"><span class="tri-val" id="en-val">5</span></div>
           </div>
         </div>
+
         <div class="section-divider"></div>
-        <p class="sec-title">Ansiedade</p>
-        <div class="slider-row"><label>Ansiedade (1-10)</label><input type="range" min="1" max="10" step="1" value="5" oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()"><span class="val-out">5</span></div>
+        <p class="sec-title">Ansiedade & stress</p>
+        <div class="slider-row">
+          <label>Ansiedade (1-10)</label>
+          <input type="range" min="1" max="10" step="1" value="5" id="ansiedade"
+            oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()">
+          <span class="val-out">5</span>
+        </div>
+        <div class="slider-row">
+          <label>Stress no trabalho (1-10)</label>
+          <input type="range" min="1" max="10" step="1" value="5" id="stress-trabalho"
+            oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()">
+          <span class="val-out">5</span>
+        </div>
+
         <div class="section-divider"></div>
         <p class="sec-title">Notas do dia</p>
         <div class="period-label">Manhã</div>
@@ -182,63 +259,177 @@
         <textarea class="nota" id="nota-tarde" placeholder="Como correu a tarde?" oninput="marcarAlterado()"></textarea>
         <div class="period-label">Noite</div>
         <textarea class="nota" id="nota-noite" placeholder="Reflexão do dia." oninput="marcarAlterado()"></textarea>
+
         <div class="section-divider"></div>
         <p class="sec-title">Gratidão do dia</p>
         <textarea class="nota" id="nota-gratidao" placeholder="Pelo que és grato hoje?" oninput="marcarAlterado()"></textarea>
       </div>
 
-      <!-- HIGIENE -->
+      <!-- ══ HIGIENE ══ -->
       <div class="panel" id="panel-higiene">
         <div class="period-label">Manhã</div>
         <div class="hab-list" id="higiene-manha">
           <div class="hab" data-id="dentes-m" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Dentes manhã</span></div>
           <div class="hab" data-id="duche" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Duche</span></div>
-          <div class="hab" data-id="skincare" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Skincare</span></div>
+          <div class="hab" data-id="skincare-m" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Skincare manhã</span></div>
           <div class="hab" data-id="med-m" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Medicação manhã</span></div>
         </div>
         <div class="period-label">Noite</div>
         <div class="hab-list" id="higiene-noite">
           <div class="hab" data-id="dentes-n" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Dentes noite</span></div>
+          <div class="hab" data-id="skincare-n" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Skincare noite</span></div>
           <div class="hab" data-id="dentadura" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Dentadura noite</span></div>
           <div class="hab" data-id="gotas" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Gotas noite</span></div>
           <div class="hab" data-id="med-j" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Medicação pós-jantar</span></div>
         </div>
       </div>
 
-      <!-- HÁBITOS BONS -->
+      <!-- ══ HÁBITOS ══ -->
       <div class="panel" id="panel-bons">
+
+        <!-- NUTRIÇÃO (veio da tab Física) -->
+        <p class="sec-title">Nutrição & hidratação</p>
+        <div class="slider-row">
+          <label>Água (litros)</label>
+          <input type="range" min="0" max="4" step="0.5" value="0" id="agua"
+            oninput="this.nextElementSibling.textContent=parseFloat(this.value).toFixed(1)+'L';marcarAlterado()">
+          <span class="val-out">0.0L</span>
+        </div>
+        <div class="slider-row">
+          <label>Alimentação (1-10)</label>
+          <input type="range" min="1" max="10" step="1" value="5" id="alimentacao"
+            oninput="this.nextElementSibling.textContent=this.value;marcarAlterado()">
+          <span class="val-out">5</span>
+        </div>
+
+        <!-- MAUS VÍCIOS -->
+        <div class="section-divider"></div>
+        <p class="sec-title">Maus vícios</p>
+
+        <!-- Álcool -->
+        <div class="vicio-block" id="vicio-alcool">
+          <div class="vicio-pergunta">
+            <span class="vicio-nome">🍺 Bebeste álcool hoje?</span>
+            <div class="vicio-btns-sim-nao">
+              <button class="vicio-btn" data-vicio="alcool" data-resp="sim" onclick="respostaVicio(this)">Sim</button>
+              <button class="vicio-btn" data-vicio="alcool" data-resp="nao" onclick="respostaVicio(this)">Não</button>
+            </div>
+          </div>
+          <div class="vicio-detalhe hidden" id="detalhe-alcool">
+            <label class="vicio-detalhe-label">Quantos copos?</label>
+            <div class="vicio-detalhe-row">
+              <input type="number" id="qtd-alcool" min="0" step="1" placeholder="0" oninput="marcarAlterado()">
+              <span class="vicio-unit">copos</span>
+              <button class="btn-nao-sei" onclick="naoSei('qtd-alcool')">Não sei ao certo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fumar -->
+        <div class="vicio-block" id="vicio-fumar">
+          <div class="vicio-pergunta">
+            <span class="vicio-nome">🚬 Fumaste hoje?</span>
+            <div class="vicio-btns-sim-nao">
+              <button class="vicio-btn" data-vicio="fumar" data-resp="sim" onclick="respostaVicio(this)">Sim</button>
+              <button class="vicio-btn" data-vicio="fumar" data-resp="nao" onclick="respostaVicio(this)">Não</button>
+            </div>
+          </div>
+          <div class="vicio-detalhe hidden" id="detalhe-fumar">
+            <label class="vicio-detalhe-label">Quantos cigarros?</label>
+            <div class="vicio-detalhe-row">
+              <input type="number" id="qtd-fumar" min="0" step="1" placeholder="0" oninput="marcarAlterado()">
+              <span class="vicio-unit">cigarros</span>
+              <button class="btn-nao-sei" onclick="naoSei('qtd-fumar')">Não sei ao certo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ecrã telemóvel -->
+        <div class="vicio-block" id="vicio-ecra">
+          <div class="vicio-pergunta">
+            <span class="vicio-nome">📱 Tempo de ecrã excessivo?</span>
+            <div class="vicio-btns-sim-nao">
+              <button class="vicio-btn" data-vicio="ecra" data-resp="sim" onclick="respostaVicio(this)">Sim</button>
+              <button class="vicio-btn" data-vicio="ecra" data-resp="nao" onclick="respostaVicio(this)">Não</button>
+            </div>
+          </div>
+          <div class="vicio-detalhe hidden" id="detalhe-ecra">
+            <label class="vicio-detalhe-label">Quantas horas de ecrã (tlm)?</label>
+            <div class="vicio-detalhe-row">
+              <input type="number" id="qtd-ecra" min="0" step="0.5" placeholder="0" oninput="marcarAlterado()">
+              <span class="vicio-unit">horas</span>
+              <button class="btn-nao-sei" onclick="naoSei('qtd-ecra')">Não sei ao certo</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MENTE & DESENVOLVIMENTO -->
+        <div class="section-divider"></div>
         <p class="sec-title">Mente & desenvolvimento</p>
-        <div class="num-row"><label>Leitura (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
-        <div class="num-row"><label>Meditação manhã (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
-        <div class="num-row"><label>Meditação noite (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
-        <div class="num-row"><label>Estudo (min)</label><input type="number" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()"></div>
+        <div class="num-row">
+          <label>Leitura (min)</label>
+          <input type="number" id="leitura-min" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()">
+        </div>
+        <div class="num-row">
+          <label>Leitura (páginas)</label>
+          <input type="number" id="leitura-pag" min="0" step="1" value="0" placeholder="0" oninput="marcarAlterado()">
+        </div>
+        <div class="num-row">
+          <label>Meditação manhã (min)</label>
+          <input type="number" id="meditacao-m" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()">
+        </div>
+        <div class="num-row">
+          <label>Meditação noite (min)</label>
+          <input type="number" id="meditacao-n" min="0" step="5" value="0" placeholder="0" oninput="marcarAlterado()">
+        </div>
+        <div class="num-row">
+          <label>Tempo de foco (min)</label>
+          <input type="number" id="foco-min" min="0" step="15" value="0" placeholder="0" oninput="marcarAlterado()">
+        </div>
+
+        <div class="section-divider"></div>
+        <p class="sec-title">Rotinas digitais</p>
+        <div class="hab-list" id="digitais-list">
+          <div class="hab" data-id="sem-tlm-manha" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Sem telemóvel de manhã</span></div>
+          <div class="hab" data-id="sem-ecra-noite" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Sem ecrã 1h antes de dormir</span></div>
+          <div class="hab" data-id="luz-solar" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Luz solar de manhã</span></div>
+        </div>
+
+        <!-- SOCIAL & BEM-ESTAR -->
         <div class="section-divider"></div>
         <p class="sec-title">Social & bem-estar</p>
         <div class="hab-list" id="bons-list">
           <div class="hab" data-id="ar" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Apanhar ar</span></div>
           <div class="hab" data-id="conviver" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Conviver</span></div>
+          <div class="hab" data-id="contactar-amigo" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Contactar um amigo / familiar</span></div>
+          <div class="hab" data-id="tempo-qualidade" onclick="toggleHab(this)"><div class="chk"><i class="ti ti-check"></i></div><span class="nm">Tempo de qualidade (sem ecrã)</span></div>
         </div>
+
       </div>
 
-      <!-- GERIR -->
+      <!-- ══ GERIR ══ -->
       <div class="panel" id="panel-cfg">
         <p class="sec-title">Hábitos personalizados</p>
         <div id="custom-list"><p class="empty-msg" id="empty-msg">Ainda não adicionaste hábitos personalizados.</p></div>
+
         <p class="sec-title" style="margin-top:1.5rem;">Hábitos de base (ocultar)</p>
         <p class="cfg-hint">Oculta hábitos que não se aplicam a ti.</p>
         <div id="base-list"></div>
+
         <div class="add-form">
           <p class="add-form-title">Adicionar novo hábito</p>
           <input type="text" class="add-input" id="new-nome" placeholder="Nome do hábito..." maxlength="50">
           <div class="add-selects">
-            <div class="add-select-group"><label>Tab</label>
+            <div class="add-select-group">
+              <label>Tab</label>
               <select id="new-tab">
                 <option value="fisica">Saúde Física</option>
                 <option value="higiene">Higiene</option>
-                <option value="bons">Hábitos Bons</option>
+                <option value="bons">Hábitos</option>
               </select>
             </div>
-            <div class="add-select-group"><label>Período</label>
+            <div class="add-select-group">
+              <label>Período</label>
               <select id="new-periodo">
                 <option value="manha">Manhã</option>
                 <option value="tarde">Tarde / Noite</option>
