@@ -1,8 +1,8 @@
 // ============================================================
 // CONFIGURAÇÃO SUPABASE
 // ============================================================
-const SUPABASE_URL = 'https://ecgixgxmzjowniwyusbv.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjZ2l4Z3htempvd25pd3l1c2J2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTg5MjYsImV4cCI6MjA5NTAzNDkyNn0.Ze_RPJvkiUxc9HbenfunCyha-hSh6Y8pDAeGgBhUT3k';
+const SUPABASE_URL = 'https://kdzuglvipxxhhadhwfxw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkenVnbHZpcHh4aGhhZGh3Znh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NDA3MTEsImV4cCI6MjA5NTIxNjcxMX0.NoXaQWaHLdTi3hdZFvHdI-W4sZHYaHzpNT2TwpSTRPc';
 
 // ============================================================
 // ESTADO
@@ -54,10 +54,22 @@ async function fazerSignup() {
   if (!/^[a-z0-9_]+$/.test(username)) { err.textContent = 'Usa apenas letras, números e _.'; return; }
   if (pass.length < 6) { err.textContent = 'A password tem de ter pelo menos 6 caracteres.'; return; }
 
-  const email = username + '@bemestar.app';
   const btn = document.querySelector('#form-signup .auth-btn');
   btn.disabled = true; btn.textContent = 'A criar conta...';
+
   try {
+    // 1. Verificar se username já existe
+    const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/utilizadores?username=eq.${username}&select=username`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const existing = await checkRes.json();
+    if (existing && existing.length > 0) {
+      err.textContent = 'Este username já está a ser usado.';
+      return;
+    }
+
+    // 2. Criar conta no Auth
+    const email = username + '@bemestar.app';
     const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
@@ -65,6 +77,18 @@ async function fazerSignup() {
     });
     const data = await res.json();
     if (data.error) { err.textContent = traduzirErro(data.error.message || data.msg); return; }
+
+    // 3. Registar username na tabela utilizadores
+    await fetch(`${SUPABASE_URL}/rest/v1/utilizadores`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${data.access_token}`
+      },
+      body: JSON.stringify({ user_id: data.user.id, username })
+    });
+
     currentUser = { ...data.user, access_token: data.access_token, username };
     localStorage.setItem('bemestar_session', JSON.stringify(currentUser));
     mostrarApp();
@@ -82,10 +106,22 @@ async function fazerLogin() {
   err.textContent = '';
   if (!username || !pass) { err.textContent = 'Preenche o utilizador e a password.'; return; }
 
-  const email = username + '@bemestar.app';
   const btn = document.querySelector('#form-login .auth-btn');
   btn.disabled = true; btn.textContent = 'A entrar...';
+
   try {
+    // 1. Verificar se username existe na tabela
+    const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/utilizadores?username=eq.${username}&select=username`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+    });
+    const existing = await checkRes.json();
+    if (!existing || existing.length === 0) {
+      err.textContent = 'Utilizador não encontrado.';
+      return;
+    }
+
+    // 2. Autenticar
+    const email = username + '@bemestar.app';
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
@@ -96,8 +132,8 @@ async function fazerLogin() {
       err.textContent = traduzirErro(data.error_description || data.error);
       return;
     }
-    const savedUsername = data.user?.user_metadata?.username || username;
-    currentUser = { ...data.user, access_token: data.access_token, username: savedUsername };
+
+    currentUser = { ...data.user, access_token: data.access_token, username };
     localStorage.setItem('bemestar_session', JSON.stringify(currentUser));
     mostrarApp();
   } catch(e) {
