@@ -11,15 +11,21 @@ const habState = {};
 const hiddenBase = {};
 let currentUser = null;
 let dadosAlterados = false;
-let acaoPendente = null; // função a executar após aviso
+let acaoPendente = null;
+
+// Estado dos vícios: { alcool: 'sim'|'nao'|null, fumar: ..., ecra: ... }
+const vicioState = { alcool: null, fumar: null, ecra: null };
+
+// Tipo de cardio selecionado
+let cardioTipo = null;
 
 const tabTargets = {
   fisica: { manha: 'fisica-manha', tarde: 'fisica-tarde' },
   higiene: { manha: 'higiene-manha', tarde: 'higiene-noite' },
   bons:    { manha: 'bons-list',    tarde: 'bons-list'    }
 };
-const tabLabels = { fisica: 'Saúde Física', higiene: 'Higiene', bons: 'Hábitos Bons' };
-const perLabels = { manha: 'Manhã', tarde: 'Tarde/Noite' };
+const tabLabels  = { fisica: 'Saúde Física', higiene: 'Higiene', bons: 'Hábitos' };
+const perLabels  = { manha: 'Manhã', tarde: 'Tarde/Noite' };
 
 // ============================================================
 // SUPABASE AUTH
@@ -40,30 +46,26 @@ async function supabaseFetch(path, options = {}) {
 }
 
 async function fazerSignup() {
-  const nome  = document.getElementById('signup-nome').value.trim();
-  const email = document.getElementById('signup-email').value.trim();
-  const pass  = document.getElementById('signup-pass').value;
-  const err   = document.getElementById('signup-error');
-
+  const username = document.getElementById('signup-user').value.trim().toLowerCase();
+  const pass     = document.getElementById('signup-pass').value;
+  const err      = document.getElementById('signup-error');
   err.textContent = '';
-  if (!nome)  { err.textContent = 'Insere o teu nome.'; return; }
-  if (!email) { err.textContent = 'Insere o teu email.'; return; }
+  if (!username) { err.textContent = 'Insere um nome de utilizador.'; return; }
+  if (!/^[a-z0-9_]+$/.test(username)) { err.textContent = 'Usa apenas letras, números e _.'; return; }
   if (pass.length < 6) { err.textContent = 'A password tem de ter pelo menos 6 caracteres.'; return; }
 
+  const email = username + '@bemestar.app';
   const btn = document.querySelector('#form-signup .auth-btn');
   btn.disabled = true; btn.textContent = 'A criar conta...';
-
   try {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-      body: JSON.stringify({ email, password: pass, data: { nome } })
+      body: JSON.stringify({ email, password: pass, data: { username } })
     });
     const data = await res.json();
     if (data.error) { err.textContent = traduzirErro(data.error.message || data.msg); return; }
-
-    // Guardar sessão e nome
-    currentUser = { ...data.user, access_token: data.access_token, nome };
+    currentUser = { ...data.user, access_token: data.access_token, username };
     localStorage.setItem('bemestar_session', JSON.stringify(currentUser));
     mostrarApp();
   } catch(e) {
@@ -74,16 +76,15 @@ async function fazerSignup() {
 }
 
 async function fazerLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  const err   = document.getElementById('login-error');
-
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const pass     = document.getElementById('login-pass').value;
+  const err      = document.getElementById('login-error');
   err.textContent = '';
-  if (!email || !pass) { err.textContent = 'Preenche email e password.'; return; }
+  if (!username || !pass) { err.textContent = 'Preenche o utilizador e a password.'; return; }
 
+  const email = username + '@bemestar.app';
   const btn = document.querySelector('#form-login .auth-btn');
   btn.disabled = true; btn.textContent = 'A entrar...';
-
   try {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
       method: 'POST',
@@ -95,9 +96,8 @@ async function fazerLogin() {
       err.textContent = traduzirErro(data.error_description || data.error);
       return;
     }
-
-    const nome = data.user?.user_metadata?.nome || email.split('@')[0];
-    currentUser = { ...data.user, access_token: data.access_token, nome };
+    const savedUsername = data.user?.user_metadata?.username || username;
+    currentUser = { ...data.user, access_token: data.access_token, username: savedUsername };
     localStorage.setItem('bemestar_session', JSON.stringify(currentUser));
     mostrarApp();
   } catch(e) {
@@ -140,12 +140,12 @@ function authTab(tab) {
 }
 
 // ============================================================
-// MOSTRAR APP / AUTH
+// MOSTRAR APP
 // ============================================================
 function mostrarApp() {
   document.getElementById('auth-screen').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
-  document.getElementById('header-nome').textContent = '— ' + currentUser.nome;
+  document.getElementById('header-nome').textContent = '— ' + currentUser.username;
   document.getElementById('data-hoje').textContent =
     new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
   updateStats();
@@ -153,20 +153,11 @@ function mostrarApp() {
 }
 
 // ============================================================
-// DADOS NÃO GUARDADOS — aviso
+// AVISO DADOS NÃO GUARDADOS
 // ============================================================
-function marcarAlterado() {
-  dadosAlterados = true;
-}
-
-function mostrarAviso() {
-  document.getElementById('aviso-overlay').classList.remove('hidden');
-}
-
-function fecharAviso() {
-  document.getElementById('aviso-overlay').classList.add('hidden');
-  acaoPendente = null;
-}
+function marcarAlterado() { dadosAlterados = true; }
+function mostrarAviso() { document.getElementById('aviso-overlay').classList.remove('hidden'); }
+function fecharAviso()  { document.getElementById('aviso-overlay').classList.add('hidden'); acaoPendente = null; }
 
 async function guardarESair() {
   await guardar();
@@ -180,20 +171,14 @@ function sairSemGuardar() {
   if (acaoPendente) { acaoPendente(); acaoPendente = null; }
 }
 
-// Aviso ao fechar/sair da página
 window.addEventListener('beforeunload', (e) => {
-  if (dadosAlterados) {
-    e.preventDefault();
-    e.returnValue = '';
-  }
+  if (dadosAlterados) { e.preventDefault(); e.returnValue = ''; }
 });
 
 // ============================================================
-// SUPABASE — guardar e carregar registo diário
+// SUPABASE — guardar e carregar
 // ============================================================
-function hojeStr() {
-  return new Date().toISOString().slice(0, 10);
-}
+function hojeStr() { return new Date().toISOString().slice(0, 10); }
 
 async function guardarNaCloud(dados) {
   try {
@@ -221,41 +206,94 @@ async function carregarDaCloud() {
 
 function recolherDados() {
   const habFeitos = Object.entries(habState).filter(([,v])=>v).map(([k])=>k);
+
   const sliders = {};
   document.querySelectorAll('input[type=range][id]').forEach(el => {
     sliders[el.id] = parseInt(el.value);
   });
-  document.querySelectorAll('input[type=time]').forEach(el => {
-    if (el.id) sliders[el.id] = el.value;
+  document.querySelectorAll('input[type=time][id]').forEach(el => {
+    sliders[el.id] = el.value;
   });
+
+  // Campos numéricos com id
+  const numericos = {};
+  ['leitura-min','leitura-pag','meditacao-m','meditacao-n','foco-min','cardio-km','cardio-min',
+   'qtd-alcool','qtd-fumar','qtd-ecra'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) numericos[id] = el.value;
+  });
+
   const notas = {};
   ['nota-manha','nota-tarde','nota-noite','nota-gratidao','nota-geral'].forEach(id => {
     const el = document.getElementById(id);
     if (el) notas[id] = el.value;
   });
-  return { hab_feitos: habFeitos, sliders, notas };
+
+  return {
+    hab_feitos: habFeitos,
+    sliders,
+    numericos,
+    notas,
+    vicios: { ...vicioState },
+    cardio_tipo: cardioTipo
+  };
 }
 
 function aplicarDados(dados) {
   if (!dados) return;
+
   if (dados.hab_feitos) {
     dados.hab_feitos.forEach(id => {
       const el = document.querySelector(`.hab[data-id="${id}"]`);
       if (el && !habState[id]) { habState[id] = true; el.classList.add('done'); }
     });
+    // Mostrar detalhes do cardio se estava feito
+    if (habState['cardio']) {
+      document.getElementById('cardio-details')?.classList.remove('hidden');
+    }
   }
+
   if (dados.sliders) {
     Object.entries(dados.sliders).forEach(([id, val]) => {
       const el = document.getElementById(id);
       if (el) { el.value = val; el.dispatchEvent(new Event('input')); }
     });
   }
+
+  if (dados.numericos) {
+    Object.entries(dados.numericos).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+  }
+
   if (dados.notas) {
     Object.entries(dados.notas).forEach(([id, val]) => {
       const el = document.getElementById(id);
       if (el) el.value = val;
     });
   }
+
+  // Restaurar vícios
+  if (dados.vicios) {
+    Object.entries(dados.vicios).forEach(([vicio, resp]) => {
+      if (resp) {
+        vicioState[vicio] = resp;
+        const btn = document.querySelector(`.vicio-btn[data-vicio="${vicio}"][data-resp="${resp}"]`);
+        if (btn) btn.classList.add('ativo');
+        if (resp === 'sim') {
+          document.getElementById(`detalhe-${vicio}`)?.classList.remove('hidden');
+        }
+      }
+    });
+  }
+
+  // Restaurar tipo cardio
+  if (dados.cardio_tipo) {
+    cardioTipo = dados.cardio_tipo;
+    document.querySelector(`.tipo-btn[data-tipo="${cardioTipo}"]`)?.classList.add('ativo');
+  }
+
   dadosAlterados = false;
   updateStats();
 }
@@ -302,6 +340,70 @@ function calcMedia(tipo) {
   const media = Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
   document.getElementById('media-' + tipo).textContent = media;
   document.getElementById('s-' + tipo).textContent = media + '/10';
+}
+
+// ============================================================
+// CARDIO
+// ============================================================
+function toggleCardioDetails() {
+  const details = document.getElementById('cardio-details');
+  const isFeito = habState['cardio'];
+  if (isFeito) {
+    details.classList.remove('hidden');
+  } else {
+    details.classList.add('hidden');
+    // Limpar seleção de tipo ao desmarcar
+    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
+    cardioTipo = null;
+  }
+}
+
+function selectTipo(btn) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
+  btn.classList.add('ativo');
+  cardioTipo = btn.dataset.tipo;
+  marcarAlterado();
+}
+
+// ============================================================
+// VÍCIOS
+// ============================================================
+function respostaVicio(btn) {
+  const vicio = btn.dataset.vicio;
+  const resp  = btn.dataset.resp;
+
+  // Toggle: se já estava ativo, desativa
+  if (vicioState[vicio] === resp) {
+    vicioState[vicio] = null;
+    btn.classList.remove('ativo');
+    document.getElementById(`detalhe-${vicio}`)?.classList.add('hidden');
+  } else {
+    vicioState[vicio] = resp;
+    // Destacar botão correto, remover do outro
+    document.querySelectorAll(`.vicio-btn[data-vicio="${vicio}"]`).forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    // Mostrar/esconder detalhe
+    const detalhe = document.getElementById(`detalhe-${vicio}`);
+    if (resp === 'sim') {
+      detalhe?.classList.remove('hidden');
+    } else {
+      detalhe?.classList.add('hidden');
+      // Limpar quantidade ao dizer não
+      const qtd = document.getElementById(`qtd-${vicio}`);
+      if (qtd) qtd.value = '';
+    }
+  }
+  marcarAlterado();
+}
+
+function naoSei(inputId) {
+  const el = document.getElementById(inputId);
+  if (el) {
+    el.value = '';
+    el.placeholder = 'Não sei ao certo';
+    el.dataset.naoSei = 'true';
+    marcarAlterado();
+  }
 }
 
 // ============================================================
@@ -401,7 +503,6 @@ function mostrarSave(msg) {
 // INIT
 // ============================================================
 function init() {
-  // Verificar sessão guardada
   const sessaoGuardada = localStorage.getItem('bemestar_session');
   if (sessaoGuardada) {
     try {
@@ -412,7 +513,6 @@ function init() {
       localStorage.removeItem('bemestar_session');
     }
   }
-  // Mostrar ecrã de auth
   document.getElementById('auth-screen').classList.remove('hidden');
 }
 
